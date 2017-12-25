@@ -1,7 +1,7 @@
 
 RELEASE=dist/md380tools-`date "+%Y-%m-%d"`
 
-.PHONY: dist all
+.PHONY: dist all distclean clean 
 
 all: image_D13
 
@@ -72,6 +72,8 @@ flash_D13: image_D13
 
 flash_S13: image_S13
 	./md380-dfu upgrade applet/experiment.bin
+
+.PHONY: sync
 
 sync:
 	"${MAKE}" -C annotations sync
@@ -164,3 +166,4 @@ ci: dbg clean
 check-ignore:
 	find -type f | git check-ignore -v --stdin | less
 
+.DELETE_ON_ERROR:

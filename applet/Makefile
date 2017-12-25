@@ -118,8 +118,9 @@ OBJS = $(SRCS:.c=.o)
 .PHONY: lib proj pre
 
 all: mark experiment.bin
-	
+
 .PHONY: mark
+
 mark:
 ifeq "$(PROBLEM)" "1"
 	@echo "=================="
@@ -135,9 +136,10 @@ lib: src/version.h config.h
 	"${MAKE}" -C lib libstm32f4.a
 
 .PHONY: base.img
+
 base.img:
 	"${MAKE}" -C ../patches/$(PATCHDIR) patched.img
-	
+
 merged.img: applet.img base.img   
 	cp ../patches/$(PATCHDIR)/patched.img ./merged.img
 	python2 merge_$(SRCVERSION).py merged.img applet.img $(MERGEBASE)
@@ -146,27 +148,28 @@ merged.img: applet.img base.img
 #	"${MAKE}" -C ../patches/$(PATCHDIR) patched.img
 #	cp ../patches/$(PATCHDIR)/patched.img ./patched.bin
 
-#The wrapped file is the one that works with the Windows updater.
+# The wrapped file is the one that works with the Windows updater.
 wrapped.bin: merged.img
 	../md380-fw --wrap merged.img wrapped.bin
 
 experiment.bin: wrapped.bin
 	cp wrapped.bin experiment.bin
-	
-##This flashes from unix. (deprecated)
+
+## This flashes from unix. (deprecated)
 #flash: wrapped
 #	../md380-dfu upgrade experiment.bin
 
 $(SRCS): config.h src/*.h | lib	
+
 applet.elf: $(SRCS)
 	$(CC) $(CFLAGS) -Wl,--no-wchar-size-warning -Wl,-Map,$(basename $@).map $^ -o $@ -Llib -lstm32f4 -Xlinker --just-symbols=src/symbols_$(SRCVERSION)
-	
+
 %.img: %.elf	
 	$(OBJDUMP) -t $< >$(basename $@).img.sym
 	$(OBJCOPY) -O binary $< $@
 
-#Temporary file containing the build date.
-#Might use version numbers when we're ready for releases.
+# Temporary file containing the build date.
+# We might use version numbers when we're ready for releases.
 src/version.h: src/*.c
 	echo "#define VERSIONDATE L\"`date "+%Y-%m-%d"`\"" >src/version.h
 	echo "#define GIT_VERSION \"$(GIT_VERSION)\"" >>src/version.h
@@ -181,11 +184,12 @@ image_D02:
 
 image_D13:
 	"${MAKE}" FW=D13_020 all  
-	
+
 image_S13:
 	"${MAKE}" FW=S13_020 all  
 
 .PHONY: ci
+
 ci:
 	"${MAKE}" CIFLAGS="-Werror -Wno-cpp" clean image_D02
 	"${MAKE}" CIFLAGS="-Werror -Wno-cpp" clean image_S13
